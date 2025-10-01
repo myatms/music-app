@@ -6,8 +6,9 @@ on:
 
 env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  GCR_REGISTRY: ${{ var.GCR_REGISTRY }}
-  REPOSITORY: ${{ var.REPOSITORY }
+  GCR_REGISTRY: ${{ vars.GCR_REGISTRY }}
+  REPOSITORY: ${{ vars.REPOSITORY }}
+  IMAGE_NAME: ${{ vars.IMAGE_NAME }}
 
 jobs:
   build-and-push:
@@ -48,3 +49,5 @@ jobs:
       run: |
         echo "✅ Docker image pushed to GCR"
         echo "📦 Image: ${{ env.IMAGE_NAME }}:${{ github.ref_name }}"
+        echo "🌐 Registry: ${{ env.GCR_REGISTRY }}"
+        echo "🏠 Repository: ${{ env.REPOSITORY }}"
