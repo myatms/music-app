@@ -1,0 +1,29 @@
+{
+  "name": "music-book",
+  "version": "1.0.0",
+  "description": "Music book application with YouTube integration",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "docker:build": "docker build -t music-book .",
+    "docker:run": "docker run -p 3000:3000 music-book"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ejs": "^3.1.9",
+    "mysql2": "^3.6.0",
+    "axios": "^1.5.0",
+    "dotenv": "^16.3.1",
+    "@opentelemetry/api": "^1.6.0",
+    "@opentelemetry/sdk-trace-node": "^1.15.0",
+    "@opentelemetry/sdk-trace-base": "^1.15.0",
+    "@opentelemetry/exporter-jaeger": "^1.15.0",
+    "@opentelemetry/resources": "^1.15.0",
+    "@opentelemetry/semantic-conventions": "^1.15.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.39.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

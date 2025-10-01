@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=mysql
+      - DB_USER=music_user
+      - DB_PASSWORD=music_password
+      - DB_NAME=music_book
+      - YOUTUBE_API_KEY=your_youtube_api_key
+      - JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+    depends_on:
+      - mysql
+      - jaeger
+    networks:
+      - music-network
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: music_book
+      MYSQL_USER: music_user
+      MYSQL_PASSWORD: music_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - music-network
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    networks:
+      - music-network
+
+volumes:
+  mysql_data:
+
+networks:
+  music-network:
+    driver: bridge

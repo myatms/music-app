@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Book - Search</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 Music Book</h1>
+            <nav>
+                <a href="/" class="active">Search</a>
+                <a href="/music">Saved Music</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="search-section">
+                <h2>Search for Music</h2>
+                <form id="searchForm">
+                    <input type="text" id="searchInput" placeholder="Enter song name or artist..." required>
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+
+            <div id="results" class="results-section">
+                <!-- Results will be displayed here -->
+            </div>
+
+            <div id="loading" class="loading" style="display: none;">
+                Searching...
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/script.js"></script>
+</body>
+</html>
