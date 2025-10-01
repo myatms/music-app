@@ -14,10 +14,17 @@ services:
       - YOUTUBE_API_KEY=your_youtube_api_key
       - JAEGER_ENDPOINT=http://jaeger:14268/api/traces
     depends_on:
-      - mysql
-      - jaeger
+      mysql:
+        condition: service_healthy
+      jaeger:
+        condition: service_started
     networks:
       - music-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   mysql:
     image: mysql:8.0
@@ -30,8 +37,15 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - music-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "music_user", "-pmusic_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   jaeger:
     image: jaegertracing/all-in-one:latest
