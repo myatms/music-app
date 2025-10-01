@@ -5,6 +5,11 @@ const { JaegerExporter } = require('@opentelemetry/exporter-jaeger');
 const { Resource } = require('@opentelemetry/resources');
 const { SEMRESATTRS_SERVICE_NAME } = require('@opentelemetry/semantic-conventions');
 
+console.log('📊 Initializing OpenTelemetry...', {
+  serviceName: process.env.SERVICE_NAME || 'music-book-app',
+  jaegerEndpoint: process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces'
+});
+
 const sdk = new NodeSDK({
   resource: new Resource({
     [SEMRESATTRS_SERVICE_NAME]: process.env.SERVICE_NAME || 'music-book-app',
@@ -17,10 +22,13 @@ const sdk = new NodeSDK({
 
 sdk.start();
 
+console.log('✅ OpenTelemetry initialized successfully');
+
 process.on('SIGTERM', () => {
+  console.log('🛑 Shutting down OpenTelemetry SDK...');
   sdk.shutdown()
-    .then(() => console.log('OpenTelemetry SDK terminated'))
-    .catch((error) => console.log('Error terminating OpenTelemetry SDK', error))
+    .then(() => console.log('✅ OpenTelemetry SDK terminated cleanly'))
+    .catch((error) => console.error('❌ Error terminating OpenTelemetry SDK:', error))
     .finally(() => process.exit(0));
 });
 

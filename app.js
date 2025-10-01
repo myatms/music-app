@@ -9,6 +9,18 @@ const musicRoutes = require('./routes/music');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Custom logging middleware
+app.use((req, res, next) => {
+  const timestamp = new Date().toISOString();
+  console.log(`📥 [${timestamp}] ${req.method} ${req.url}`, {
+    ip: req.ip,
+    userAgent: req.get('User-Agent'),
+    query: req.query,
+    body: req.method === 'POST' ? req.body : undefined
+  });
+  next();
+});
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -23,34 +35,67 @@ app.use('/api/music', musicRoutes);
 
 // Render main page
 app.get('/', (req, res) => {
+  console.log('🎵 Rendering main page');
   res.render('index');
 });
 
 // Render music management page
 app.get('/music', (req, res) => {
+  console.log('🎵 Rendering music management page');
   res.render('music');
 });
 
 // Health check endpoint
 app.get('/health', async (req, res) => {
+  console.log('🔍 Health check requested');
   const dbHealthy = await testConnection();
-  res.json({
+  const healthStatus = {
     status: dbHealthy ? 'healthy' : 'unhealthy',
     database: dbHealthy ? 'connected' : 'disconnected',
-    timestamp: new Date().toISOString()
-  });
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage()
+  };
+  console.log('❤️ Health status:', healthStatus);
+  res.json(healthStatus);
+});
+
+// Response logging middleware
+app.use((req, res, next) => {
+  const originalSend = res.send;
+  res.send = function(data) {
+    const timestamp = new Date().toISOString();
+    console.log(`📤 [${timestamp}] ${req.method} ${req.url} → Status: ${res.statusCode}`, {
+      statusCode: res.statusCode,
+      contentLength: JSON.stringify(data)?.length || 0,
+      response: res.statusCode >= 400 ? data : undefined // Log error responses
+    });
+    originalSend.apply(res, arguments);
+  };
+  next();
 });
 
 // Error handling middleware
 app.use((error, req, res, next) => {
-  console.error('Unhandled error:', error);
-  res.status(500).json({ error: 'Internal server error' });
+  const timestamp = new Date().toISOString();
+  console.error(`💥 [${timestamp}] Unhandled error:`, {
+    message: error.message,
+    stack: error.stack,
+    url: req.url,
+    method: req.method,
+    body: req.body
+  });
+  res.status(500).json({ error: 'Internal server error', details: error.message });
 });
 
 // Improved server startup with database readiness check
 const startServer = async () => {
   try {
-    console.log('🚀 Starting Music Book application...');
+    console.log('🚀 Starting Music Book application...', {
+      port: PORT,
+      nodeEnv: process.env.NODE_ENV,
+      dbHost: process.env.DB_HOST
+    });
     
     // Initialize database with retry logic
     await initializeDatabase();
@@ -60,10 +105,15 @@ const startServer = async () => {
       console.log(`🎵 Music Book app running on http://localhost:${PORT}`);
       console.log('📊 OpenTelemetry tracing enabled');
       console.log('✅ Application ready!');
+      console.log('📝 Detailed logging enabled for all operations');
     });
     
   } catch (error) {
-    console.error('💥 Failed to start server:', error.message);
+    console.error('💥 Failed to start server:', {
+      message: error.message,
+      stack: error.stack,
+      code: error.code
+    });
     console.log('🔄 Application will start but database operations may fail');
     
     // Start server anyway but warn about database issues
